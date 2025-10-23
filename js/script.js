@@ -80,6 +80,21 @@
     li.textContent = `${new Date().toLocaleTimeString()} - ${text}`;
     if(type) li.classList.add(type);
     logList.insertBefore(li, logList.firstChild);
+    // show visual alert for errors/faults/info
+    if(type==='error' || type==='fault' || type==='info') showVisualAlert(text,type);
+  }
+
+  // Visual alert helper
+  const visualAlert = document.getElementById('visual-alert');
+  let visualTimer = null;
+  function showVisualAlert(text,type){
+    if(!visualAlert) return;
+    visualAlert.textContent = text;
+    visualAlert.className = '';
+    visualAlert.classList.add(type||'info');
+    visualAlert.style.display = 'block';
+    if(visualTimer) clearTimeout(visualTimer);
+    visualTimer = setTimeout(()=>{ visualAlert.style.display='none'; visualAlert.className=''; }, 3800);
   }
 
   // Simple LRU-ish: ages increase, replace highest age or invalid
