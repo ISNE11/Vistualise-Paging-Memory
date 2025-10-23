@@ -403,6 +403,34 @@
   document.getElementById('tutorial-reset').addEventListener('click', ()=>{ resetTutorialUI(); });
   document.getElementById('tutorial-run').addEventListener('click', ()=>{
     const addr = document.getElementById('tutorial-address').value.trim() || '1,0';
+    // helper: perform TLB insert and log
+    function performTlbInsert(page, frame){
+      tlbInsert(page,frame);
+      logEvent(`(Tutorial) Inserted page ${page} -> frame ${frame} into TLB`,'info');
+    }
+    // helper: perform page load (same as translate load but immediate within tutorial step)
+    function performPageLoad(page){
+      const freeIdx = physical.findIndex(f=>!f.contents);
+      let free = freeIdx;
+      if(free===-1){
+        free = 0;
+        const victimPage = pageTable.findIndex(e=>e.present && e.frame===free);
+        if(victimPage!==-1){
+          pageTable[victimPage].present = false;
+          pageTable[victimPage].frame = null;
+          tlb.forEach((te,idx)=>{ if(te.valid && te.page===victimPage){ tlb[idx].valid=false; logEvent(`(Tutorial) Evicted page ${victimPage} from TLB (invalidated)`, 'info'); } });
+          logEvent(`(Tutorial) Evicted page ${victimPage} from frame ${free}`,'info');
+        }
+      }
+      pageTable[page].present = true;
+      pageTable[page].frame = free;
+      physical[free].contents = `Page ${page} data`;
+      // insert into TLB
+      tlbInsert(page, free);
+      renderTables();
+      logEvent(`(Tutorial) Loaded page ${page} into frame ${free}`,'info');
+    }
+
     runTutorialOnce(addr,(i,s,info)=>{
       // on each step, update highlights
       clearHighlights();
@@ -417,16 +445,22 @@
       } else if(s.arrow==='a-tlb-pt'){
         const parts = addr.split(',').map(x=>x.trim()); const page=Number(parts[0]);
         highlightPage(page,'row-highlight'); msgEl.textContent = s.desc;
+        // if page table had mapping (ptHit), insert into TLB now to update visualization
+        if(info.ptHit){ performTlbInsert(page, info.frame); }
       } else if(s.arrow==='a-pt-mem'){
         const parts = addr.split(',').map(x=>x.trim()); const page=Number(parts[0]);
         if(pageTable[page] && pageTable[page].present){ highlightPage(page,'hit'); highlightFrame(pageTable[page].frame,'mem-highlight'); msgEl.textContent = s.desc; }
-        else { msgEl.textContent = s.desc; }
+        else { 
+          msgEl.textContent = s.desc;
+          // page fault case: load page now (tutorial) to update tables
+          performPageLoad(page);
+          // highlight the loaded page/frame
+          highlightPage(page,'hit');
+          highlightFrame(pageTable[page].frame,'mem-highlight');
+        }
       }
     },(info)=>{
-      // done
-      // if page fault, simulate load (reuse translation code)
-      const parts = (document.getElementById('tutorial-address').value || '1,0').split(',').map(s=>s.trim());
-      translateAddress(parts.join(','));
+      // done — nothing more to do; tutorial already updated state step-by-step
     });
   });
 
@@ -449,14 +483,19 @@
       const parts = addr.split(',').map(x=>x.trim()); const page=Number(parts[0]);
       if(tutStep===0){ /* cpu->tlb */ }
       else if(s.arrow==='a-tlb-mem'){ const entry = tlb.findIndex(e=>e.valid && e.page===page); if(entry!==-1){ highlightTLBIndex(entry,'hit'); highlightFrame(tlb[entry].frame,'mem-highlight'); msgEl.textContent = s.desc; } }
-      else if(s.arrow==='a-tlb-pt'){ highlightPage(page,'row-highlight'); msgEl.textContent = s.desc; }
-      else if(s.arrow==='a-pt-mem'){ if(pageTable[page] && pageTable[page].present){ highlightPage(page,'hit'); highlightFrame(pageTable[page].frame,'mem-highlight'); msgEl.textContent = s.desc; } else { msgEl.textContent = s.desc; } }
+      else if(s.arrow==='a-tlb-pt'){ highlightPage(page,'row-highlight'); msgEl.textContent = s.desc; // if PT hit, insert into TLB now
+        const curInfo = buildSequenceForAddress(addr);
+        if(curInfo.ptHit){ tlbInsert(page, curInfo.frame); logEvent(`(Tutorial-step) Inserted page ${page} -> frame ${curInfo.frame} into TLB`,'info'); }
+      }
+      else if(s.arrow==='a-pt-mem'){ if(pageTable[page] && pageTable[page].present){ highlightPage(page,'hit'); highlightFrame(pageTable[page].frame,'mem-highlight'); msgEl.textContent = s.desc; } else { msgEl.textContent = s.desc; // page fault: load now
+          performPageLoad(page);
+          highlightPage(page,'hit'); highlightFrame(pageTable[page].frame,'mem-highlight');
+        } }
       tutStep++;
     } else {
       // end
       tutActive=false; tutSequence=[]; tutStep=0;
-      // if finished and last was page fault, run translation to simulate load
-      translateAddress(document.getElementById('tutorial-address').value || '1,0');
+      // tutorial already updated state step-by-step
     }
   });
 
