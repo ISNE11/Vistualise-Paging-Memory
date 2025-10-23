@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Paging & TLB Visualization</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Paging & TLB Visualization</h1>
+    <p class="subtitle">Visual demo: CPU → TLB → Page Table → Physical Memory</p>
+  </header>
+
+  <main class="container">
+    <section class="controls">
+      <div class="cpu-block" id="cpu" data-tooltip="CPU: Provides a logical address (page,offset) to be translated.">
+        <h2>CPU</h2>
+        <div class="cpu-input">
+          <label for="logical">Logical address (page,offset):</label>
+          <input id="logical" placeholder="e.g. 2,5" aria-label="Logical address in page,offset">
+          <button id="translate">Translate</button>
+        </div>
+        <div class="message" id="message" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="visuals">
+      <div class="panel tlb" id="tlb" data-tooltip="TLB: A small cache of recent virtual-to-physical page translations. Fast lookup for address translation.">
+        <h2>TLB</h2>
+        <table id="tlb-table">
+          <thead><tr><th>Entry</th><th>Page</th><th>Frame</th><th>Valid</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="panel page-table" id="pagetable" data-tooltip="Page Table: Maps virtual pages to physical frames. If not present, a page fault occurs.">
+        <h2>Page Table</h2>
+        <table id="pt-table">
+          <thead><tr><th>Page</th><th>Frame</th><th>Present</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="panel phys-mem" id="memory" data-tooltip="Physical Memory: Frames hold the actual data. The physical address is (frame,offset).">
+        <h2>Physical Memory</h2>
+        <table id="mem-table">
+          <thead><tr><th>Frame</th><th>Contents</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="explain">
+      <h2>How translation works</h2>
+      <p>
+        The CPU issues a logical address as (page,offset). The translation process checks the TLB first for a mapping from page to frame (TLB hit).
+        If the TLB doesn't contain the mapping (TLB miss), the page table is consulted. If the page table indicates the page is present in memory, the mapping is loaded (and optionally inserted into the TLB) and the frame is used to form the physical address (frame,offset).
+        If the page is not present, a page fault occurs and the OS must bring the page into physical memory.
+      </p>
+      <ul>
+        <li>CPU → check TLB (fast)</li>
+        <li>If miss → check Page Table (slower)</li>
+        <li>If present → form physical address and access memory</li>
+        <li>If not present → page fault, need to load page into a free frame</li>
+      </ul>
+      <p class="note">Use the input to try addresses and watch TLB/Page Table hits, misses, and memory frame highlights.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>Made for teaching — interactive paging &amp; TLB demo (plain JavaScript)</p>
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
