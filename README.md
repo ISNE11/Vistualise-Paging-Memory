@@ -1,27 +1,62 @@
 # Paging & TLB Visualization
 
-This is a small client-side demo that visualizes virtual address translation using a TLB and a page table into physical memory.
+A small, client-side demo that visualizes virtual-to-physical address translation using a simple TLB and page table model.
 
-Files:
+This project is intentionally minimal and self-contained so you can open the HTML in a browser and experiment with translation, TLB hits/misses, and page faults.
 
-- `index.html` — single-page web UI
+## Features
+
+- Interactive single-page UI that simulates address translation
+- Visual highlights for TLB hits, page table hits, and page faults
+- Simple replacement policy for TLB and a naive victim selection for frame eviction (easy to modify)
+
+## Files
+
+- `index.html` — application UI
 - `css/styles.css` — styles and layout
-- `js/script.js` — translation logic and UI wiring
+- `js/script.js` — simulation logic and UI wiring (configuration constants at the top)
 
-How to open:
+## Quick start
 
-1. Open `index.html` in your browser (double-click or open file).
-2. Enter a logical address in the input box using the format `page,offset` (for example `2,5`) and click Translate.
+Open the demo in your browser. Two easy ways from PowerShell:
 
-Behavior:
+```powershell
+# Open the file in your default browser
+Start-Process .\index.html
+```
 
-- The demo contains a small TLB (4 entries), a page table (8 pages), and physical memory (6 frames).
-- Some pages are preloaded. TLB and page table hits are highlighted.
-- On a page fault, the demo simulates loading the page into a free frame (or evicting a simple victim) and updates the page table and TLB.
+In the page UI:
+- Enter a logical address in the format `page,offset` (example: `2,5`) and click Translate.
+- The UI shows whether the translation used the TLB, the page table, or triggered a page fault.
 
-Notes for educators:
+## Configuration
 
-- You can modify the constants at the top of `js/script.js` to change the number of pages/frames/TLB entries.
-- The simulation uses a simple replacement policy for TLB (age-based) and naive eviction for demonstration.
+You can change the simulation size and behavior by editing the constants at the top of `js/script.js`. Typical variables to look for:
 
-Enjoy experimenting and teaching address translation flows!
+- number of pages / logical address space size
+- number of physical frames
+- TLB size
+- any preloaded page/frame state used for demonstrations
+
+Adjusting these values is a quick way to show different behaviours (higher page count → more page faults, smaller TLB → more misses, etc.).
+
+## Usage examples
+
+- `2,5` — translate page 2 with offset 5
+- `0,0` — first byte of page 0
+
+Tip: Try sequences of translations to observe how the TLB warms up and how page faults populate frames.
+
+## For educators
+
+- Modify the constants and reload the page to create classroom exercises.
+- Use step-by-step translations to demonstrate translation lookups, TLB caching, and page fault handling.
+
+## Contributing & license
+
+This is a small demo intended for learning and teaching. Feel free to copy, adapt, or extend the code for your own use. If you plan to redistribute or publish this project, add an appropriate `LICENSE` file.
+
+## Notes
+
+- This demo is not a production emulator. Replacement policies and eviction choices are simplified to make the flow easy to follow.
+- If you want help adding features (different replacement policies, statistics, or exportable traces), tell me what you'd like and I can implement them.
