@@ -51,6 +51,24 @@
       </div>
     </section>
 
+    <section class="page-mgmt">
+      <div class="panel" style="margin-top:12px;">
+        <h2>Manage Pages</h2>
+        <div class="manage-controls">
+          <label for="new-page">New page number:</label>
+          <input id="new-page" placeholder="e.g. 8" />
+          <button id="add-page">Add Page</button>
+          <label for="del-page">Delete page:</label>
+          <input id="del-page" placeholder="page #" />
+          <button id="del-page-btn">Delete</button>
+        </div>
+        <div class="event-log" id="event-log">
+          <h3>Event log</h3>
+          <ul id="log-list"></ul>
+        </div>
+      </div>
+    </section>
+
     <section class="explain">
       <h2>How translation works</h2>
       <p>
@@ -65,6 +83,27 @@
         <li>If not present → page fault, need to load page into a free frame</li>
       </ul>
       <p class="note">Use the input to try addresses and watch TLB/Page Table hits, misses, and memory frame highlights.</p>
+    </section>
+
+    <section class="tutorial" id="tutorial-section">
+      <h2>Tutorial & Visual Flow</h2>
+      <div class="tutorial-controls">
+        <button id="tutorial-run">Run</button>
+        <button id="tutorial-step">Next Step</button>
+        <button id="tutorial-reset">Reset</button>
+        <label for="tutorial-address">Address:</label>
+        <input id="tutorial-address" placeholder="e.g. 1,2">
+      </div>
+      <div class="flow-wrap">
+        <svg id="flow-svg" viewBox="0 0 1000 220" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+      <ol class="tutorial-steps" id="tutorial-steps">
+        <li data-step="0"><strong>CPU</strong> issues logical address (page,offset).</li>
+        <li data-step="1">Check <strong>TLB</strong> for page → if present, TLB hit and stop.</li>
+        <li data-step="2">On TLB miss, consult <strong>Page Table</strong>.</li>
+        <li data-step="3">If page present → map to frame and access <strong>Physical Memory</strong>.</li>
+        <li data-step="4">If not present → page fault and load page into a frame, update page table (and TLB).</li>
+      </ol>
     </section>
   </main>
 
