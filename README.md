@@ -52,9 +52,13 @@ Tip: Try sequences of translations to observe how the TLB warms up and how page 
 - Modify the constants and reload the page to create classroom exercises.
 - Use step-by-step translations to demonstrate translation lookups, TLB caching, and page fault handling.
 
-## Contributing & license
+## Contributing
 
-This is a small demo intended for learning and teaching. Feel free to copy, adapt, or extend the code for your own use. If you plan to redistribute or publish this project, add an appropriate `LICENSE` file.
+This is a small demo intended for learning and teaching. Contributions that improve clarity, add examples, or fix bugs are welcome. Please read `CONTRIBUTING.md` for details on reporting issues and submitting pull requests.
+
+## License
+
+This project is available under the terms of the MIT License — see `LICENSE` for details.
 
 ## Notes
 
